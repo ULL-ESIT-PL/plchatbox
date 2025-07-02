@@ -1,17 +1,31 @@
-// Creates a standalone question from the chat-history and the current question
-export const STANDALONE_QUESTION_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+// Promp para determinar el tema sobre el que trata la pregunta del usuario.
+export const TOPIC_TEMPLATE = `
+Dado el siguiente texto del usuario:
+"""
+{input}
+"""
+dadas las siguientes categorías descripciones de temas determina el tema más relevante:
 
-Chat History:
-{chat_history}
-Follow Up Input: {question}
-Standalone question:`;
+1. type-checking: Preguntas sobre tipos de datos, sistemas de tipos, tipado estático/dinámico, polimorfismo, currying, funciones de orden superior, inferencia de tipos, etc. o funciones de orden superior en lenguajes funcionales.
 
-// Actual question you ask the chat and send the response to client
-export const QA_TEMPLATE = `You are an enthusiastic AI assistant. Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say you don't know. DO NOT try to make up an answer.
-If the question is not related to the context, politely respond that you are tuned to only answer questions that are related to the context.
+En general, cualquier pregunta que trate sobre cómo se asignan, comprueban o infieren los tipos de datos en lenguajes de programación o compiladores entra dentro de este tema. 
+ 
+2. code-generation: Preguntas sobre bytecode, JIT, motores como V8, optimización, profiling, o compilación de código.
 
+También se incluye cualquier pregunta que aborde el uso práctico o técnico del motor V8 para performance, compilación, análisis de código, o integración con C++.
+
+3. translation: Preguntas sobre cómo añadir nuevas construcciones a un lenguaje, modificar la gramática, generar AST, traducir a otro lenguaje, etc.
+
+
+Responde únicamente con el nombre del tema (type-checking, code-generation, translation) que más se relaciona. No des ninguna explicación. Limitate a los temas listados arriba. Si no hay coincidencia, responde "Ninguno".
+`;
+
+// Prompt para generar una respuesta a partir de un contexto dado
+export const ANSWER_TEMPLATE = `Responde la siguiente pregunta del usuario usando unicamente el contexto proporcionado. Si no hay suficiente información, responde que no lo sabes.
+
+Contexto:
 {context}
 
-Question: {question}
-Helpful answer in markdown:`;
+Pregunta:
+{query}
+`;

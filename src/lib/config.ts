@@ -1,3 +1,4 @@
+import { PanelTopIcon } from 'lucide-react';
 import z from 'zod';
 
 const envSchema = z.object({
@@ -8,6 +9,8 @@ const envSchema = z.object({
   MARKDOWN_PATH: z.string().trim().min(1),
   FILES_PATH: z.string().trim().min(1),
   INDEX_INIT_TIMEOUT: z.coerce.number().min(1),
+  TOPICS_PATH: z.string().trim().min(1),
+  DOCUMENT_INDEX_PATH: z.string().trim().min(1),
 });
 
 export const env = envSchema.parse(process.env);

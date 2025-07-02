@@ -1,0 +1,26 @@
+[
+  {
+    "filename": "bytecode.mdx",
+    "tema": "code-generation",
+    "path": "topics/code-generation/bytecode.mdx",
+    "chunks": 14
+  },
+  {
+    "filename": "experiment.mdx",
+    "tema": "gorace",
+    "path": "topics/gorace/experiment.mdx",
+    "chunks": 18
+  },
+  {
+    "filename": "translating2js.mdx",
+    "tema": "translation",
+    "path": "topics/translation/translating2js.mdx",
+    "chunks": 18
+  },
+  {
+    "filename": "basic-concepts.mdx",
+    "tema": "type-checking",
+    "path": "topics/type-checking/basic-concepts.mdx",
+    "chunks": 35
+  }
+]

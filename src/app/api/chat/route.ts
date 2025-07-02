@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callChain } from "@/lib/langchain";
 import { Message } from "ai";
+import { handleQuery } from "@/lib/handle-query";
 
 const formatMessage = (message: Message) => {
     return `${message.role === "user" ? "Human" : "Assistant"}: ${
@@ -24,12 +24,15 @@ export async function POST(req: NextRequest) {
     }
   
     try {
+      /*
       const streamingTextResponse = callChain({
         question,
         chatHistory: formattedPreviousMessages.join("\n"),
       });
-  
-      return streamingTextResponse;
+      */
+
+      const answer = await handleQuery(question);
+      return new Response(answer);
     } catch (error) {
       console.error("Internal server error ", error);
       return NextResponse.json("Error: Something went wrong. Try again!", {
