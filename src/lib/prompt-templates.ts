@@ -21,11 +21,30 @@ Responde únicamente con el nombre del tema (type-checking, code-generation, tra
 `;
 
 // Prompt para generar una respuesta a partir de un contexto dado
-export const ANSWER_TEMPLATE = `Responde la siguiente pregunta del usuario usando unicamente el contexto proporcionado. Si no hay suficiente información, responde que no lo sabes.
+export const ANSWER_TEMPLATE = `Responde la siguiente pregunta del usuario usando el contexto proporcionado. En el caso de ser codogo la respuesta, formatea el código en bloques de código Markdown. Si no hay suficiente información, indica que no puedes responder. Ademas, incluye un enlace {url} como documentación relevante.
 
 Contexto:
 {context}
 
 Pregunta:
 {query}
+`;
+
+export const SUBTOPIC_TEMPLATE_EXPRESIONES_REGULARES = `
+Dado el siguiente texto del usuario:
+"""
+{input}
+"""
+y las siguientes categorías de subtemas en los diferentes archivos de documentación: 
+
+-generacion-de-analizadores-lexicos. "Creación de analizadores léxicos en JavaScript usando expresiones regulares avanzadas."
+-hello-js. "Ejemplo práctico de uso de un generador de analizadores léxicos en JavaScript con tokens definidos mediante expresiones regulares."
+-hello-unicode-js. "Ejemplo de analizador léxico Unicode-aware en JavaScript usando expresiones regulares con propiedades Unicode."
+-introduccion-a-regexp. 
+-regexp-en-otros-lenguajes. "Recopilación de recursos (enlaces) y apuntes sobre el uso de expresiones regulares en diversos lenguajes de programación y herramientas."
+-regexpejercicios. "Conjunto de ejercicios prácticos de expresiones regulares que incluyen cadenas, números, y validación de números de teléfono."
+-unicode-utf-16-and-js. 
+
+Determina el subtema más relevante y responde únicamente con el nombre del archivo (generacion-de-analizadores-lexicos.mdx, hello-js.md, hello-unicode-js.md, introduccion-a-regexp.md, regexp-en-otros-lenguajes.md, regexpejercicios.md, unicode-utf-16-and-js.md) que más se relaciona. No des ninguna explicación. Limitate a los temas listados arriba. Si no hay coincidencia, responde "Ninguno".
+
 `;

@@ -90,7 +90,7 @@ async function processAll(index: any) {
 
   for (const tema of temas) {
     const dirPath = path.join(env.TOPICS_PATH, tema);
-    const files = fs.readdirSync(dirPath).filter(f => f.endsWith(".mdx"));
+    const files = fs.readdirSync(dirPath).filter(f => f.endsWith(".mdx") || f.endsWith(".md"));
     console.log(`Procesando tema: ${tema} con ${files.length} archivos`);
     if (files.length === 0) {
       console.log(`No hay archivos .mdx en el tema "${tema}"`);

@@ -1,5 +1,6 @@
 import { PanelTopIcon } from 'lucide-react';
 import z from 'zod';
+import { SUBTOPIC_TEMPLATE_EXPRESIONES_REGULARES } from './prompt-templates';
 
 const envSchema = z.object({
   OPENAI_API_KEY: z.string().trim().min(1),
@@ -14,3 +15,13 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse(process.env);
+
+export const DEFAULT_TOPIC = "general";
+
+export const topicWithSubtopics = [
+  "expresiones-regulares-y-analisis-lexico",
+];
+
+export const subtopicPrompts: Record<string, string> = {
+  "expresiones-regulares-y-analisis-lexico": SUBTOPIC_TEMPLATE_EXPRESIONES_REGULARES,
+};

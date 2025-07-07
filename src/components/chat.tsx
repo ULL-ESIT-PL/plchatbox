@@ -6,13 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { scrollToBottom, initialMessages, getSources } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTopic } from "./topic-context";
+
+//import { Select } from "@radix-ui/react-select";
+
 
 export function Chat() {
+    const { topic } = useTopic();
     const containerRef = useRef<HTMLDivElement | null>(null);
+
     const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
       useChat({
         initialMessages,
+        body: {
+          topic,
+        }
       });
   
     useEffect(() => {
@@ -27,7 +36,6 @@ export function Chat() {
               key={id}
               role={role}
               content={content}
-              // Start from the third message of the assistant
               sources={data?.length ? getSources(data, role, index) : []}
             />
           ))}

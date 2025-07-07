@@ -54,7 +54,7 @@ export const initialMessages: Message[] = [
   {
     role: "assistant",
     id: "0",
-    content: "Hi! I am your PDF assistant. I am happy to help with your questions.",
+    content: "Hola soy tu asistente de Procesadores de Lenguajes, por favor realiza las prengustas de manera clara y concisa. Recuerda seleccionar el tema correcto en el menú de arriba.",
   },
 ];
 

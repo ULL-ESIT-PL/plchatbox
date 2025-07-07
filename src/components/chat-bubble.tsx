@@ -2,8 +2,6 @@ import Balancer from "react-wrap-balancer";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,63 +15,41 @@ import { Message } from "ai/react";
 import ReactMarkdown from "react-markdown";
 import { formattedText } from "@/lib/utils";
 
-const convertNewLines = (text: string) =>
-  text.split("\n").map((line, i) => (
-    <span key={i}>
-      {line}
-      <br />
-    </span>
-  ));
 
 interface ChatLineProps extends Partial<Message> {
   sources: string[];
 }
 
-export function ChatLine({
-  role = "assistant",
-  content,
-  sources,
-}: ChatLineProps) {
-  if (!content) {
-    return null;
-  }
-  const formattedMessage = convertNewLines(content);
+export function ChatLine({ role = "assistant", content }: ChatLineProps) {
+  if (!content) return null;
+
+  const isUser = role !== "assistant";
 
   return (
-    <div>
-      <Card className="mb-2">
-        <CardHeader>
-          <CardTitle
-            className={
-              role != "assistant"
+    <div className={`mb-2 flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <Card className={`inline-block ${isUser ? "bg-blue-100 dark:bg-blue-600" : "bg-amber-100 dark:bg-amber-600"}`}>
+      <CardHeader className={`${isUser ? "items-end text-right" : "items-start text-left"}`}>
+        <CardTitle
+          className={
+            role !== "assistant"
+              ? "text-amber-500 dark:text-amber-200"
+              : "text-blue-500 dark:text-blue-200"
+          }
+        >
+          {role === "assistant" ? "PL Chatbot" : "Usuario"}
+        </CardTitle>
+      </CardHeader>
+        <CardContent className={`text-sm ${isUser ? "text-right" : "text-left"}`}>
+          <p
+            className={`font-semibold mb-1 ${
+              isUser
                 ? "text-amber-500 dark:text-amber-200"
                 : "text-blue-500 dark:text-blue-200"
-            }
+            }`}
           >
-            {role == "assistant" ? "AI" : "You"}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm">
-          <Balancer>{formattedMessage}</Balancer>
+          </p>
+          <p>{content}</p>
         </CardContent>
-        <CardFooter>
-          <CardDescription className="w-full">
-            {sources && sources.length ? (
-              <Accordion type="single" collapsible className="w-full">
-                {sources.map((source, index) => (
-                  <AccordionItem value={`source-${index}`} key={index}>
-                    <AccordionTrigger>{`Source ${index + 1}`}</AccordionTrigger>
-                    <AccordionContent>
-                        <ReactMarkdown>{formattedText(source)}</ReactMarkdown>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            ) : (
-              <></>
-            )}
-          </CardDescription>
-        </CardFooter>
       </Card>
     </div>
   );
