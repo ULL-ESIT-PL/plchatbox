@@ -1,5 +1,5 @@
-# # Documentación de la aplicación
-# ## PL Chatbot
+# Documentación de la aplicación
+# PL Chatbot
 Esta aplicación es un chatbot que utiliza OpenAI y Pinecone para responder preguntas sobre el temario de la asignatura de Programación de Lenguajes. 
 
 ## Requisitos
