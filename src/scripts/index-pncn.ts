@@ -31,6 +31,8 @@ function splitText(text: string, chunkSize = 500, overlap = 50): string[] {
   return chunks;
 }
 
+
+
 // Embedding directo con OpenAI
 async function embedTexts(texts: string[]): Promise<number[][]> {
   const response = await axios.post(
@@ -52,7 +54,7 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
 
 async function processFile(filePath: string, tema: string, index: any) {
   const content = fs.readFileSync(filePath, "utf-8");
-  const fileName = path.basename(filePath);
+  const fileName = path.relative(path.join(env.TOPICS_PATH, tema), filePath);
   const chunks = splitText(content);
 
   const embeddings = await embedTexts(chunks);
@@ -79,7 +81,24 @@ async function processFile(filePath: string, tema: string, index: any) {
   });
 }
 
-async function processAll(index: any) {
+
+async function recursiveProcessDir(dirPath: string , tema: string, index: any) {
+  const content = fs.readdirSync(dirPath);
+  for (const item of content) {
+    const fullPath = path.join(dirPath, item);
+    if (fs.statSync(fullPath).isDirectory()) {
+      await recursiveProcessDir(fullPath, tema, index);
+    }
+    else if (item.endsWith(".mdx") || item.endsWith(".md")) {
+      console.log(`Procesando archivo: ${fullPath} en tema "${tema}"`);
+      const filename = path.relative(path.join(env.TOPICS_PATH, tema), fullPath);
+      console.log(`campo filename: ${filename}`);
+      await processFile(fullPath, tema, index);
+    }
+  }
+}
+
+async function processAll(index: any) { 
   const temas = fs.readdirSync(env.TOPICS_PATH).filter(dir =>
     fs.statSync(path.join(env.TOPICS_PATH, dir)).isDirectory()
   );
@@ -90,7 +109,15 @@ async function processAll(index: any) {
 
   for (const tema of temas) {
     const dirPath = path.join(env.TOPICS_PATH, tema);
-    const files = fs.readdirSync(dirPath).filter(f => f.endsWith(".mdx") || f.endsWith(".md"));
+    console.log(`Procesando tema: ${tema} en ${dirPath}`);
+    if (!fs.existsSync(dirPath)) {
+      console.error(`El directorio del tema "${tema}" no existe: ${dirPath}`);
+      continue;
+    }
+    // Procesar archivos en el directorio del tema
+    await recursiveProcessDir(dirPath, tema, index); 
+
+    /*const files = fs.readdirSync(dirPath).filter(f => f.endsWith(".mdx") || f.endsWith(".md"));
     console.log(`Procesando tema: ${tema} con ${files.length} archivos`);
     if (files.length === 0) {
       console.log(`No hay archivos .mdx en el tema "${tema}"`);
@@ -103,7 +130,7 @@ async function processAll(index: any) {
       const fullPath = path.join(dirPath, file);
       console.log(`Procesando archivo: ${fullPath} en tema "${tema}"`);
       await processFile(fullPath, tema, index);
-    }
+    }*/
   }
 
   fs.writeFileSync(

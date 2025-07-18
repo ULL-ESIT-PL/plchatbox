@@ -1,5 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
@@ -39,5 +40,7 @@ export async function generateChatCompletion(
 
     return response.data.choices[0].message.content.trim();
 }
+
+
 
 

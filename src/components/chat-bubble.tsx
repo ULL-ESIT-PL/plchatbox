@@ -5,22 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Message } from "ai/react";
 import ReactMarkdown from "react-markdown";
-import { formattedText } from "@/lib/utils";
 
 
-interface ChatLineProps extends Partial<Message> {
-  sources: string[];
-}
-
-export function ChatLine({ role = "assistant", content }: ChatLineProps) {
+export function ChatLine({ role = "assistant", content = "" }) {
   if (!content) return null;
 
   const isUser = role !== "assistant";
@@ -48,7 +37,7 @@ export function ChatLine({ role = "assistant", content }: ChatLineProps) {
             }`}
           >
           </p>
-          <p>{content}</p>
+          <ReactMarkdown>{content}</ReactMarkdown>
         </CardContent>
       </Card>
     </div>

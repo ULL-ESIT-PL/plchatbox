@@ -4,7 +4,7 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { TOPIC_TEMPLATE, ANSWER_TEMPLATE} from "./prompt-templates";
 import { generateEmbedding, generateChatCompletion } from "./openai";
 import { TemplateContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { topicWithSubtopics, subtopicPrompts, temaConMuchosSubtemas } from "./config";
+import { topicWithSubtopics, subtopicPrompts } from "./config";
 import OpenAI from "openai";
 import { StreamingTextResponse, OpenAIStream, LangChainStream, experimental_StreamData } from "ai";
 import { ChatCompletionChunk } from "openai/resources/index.mjs";
@@ -15,14 +15,9 @@ dotenv.config();
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME!;
-const NUM_SUBTOPICS = 3;
-
-let subtemasSeleccionados: string[] = [];
 
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,});
-
-
 
 
 async function seleccionarSubtemaMasRelevante(query: string, topic_selected: string): Promise<string> {
@@ -88,48 +83,7 @@ async function seleccionarSubtemaMasRelevante(query: string, topic_selected: str
 }
 // Nota: Este código asume que los metadatos de los chunks contienen un campo "filename" que representa el subtema. 
 
-export function rankSubtemasPorRelevancia(matches: any[]): string[] {
-  const alpha = 0.1;
-  const betta = 8.0;
-  const gamma = 0.1;
 
-  const subtopicStats: Record<string, {
-    totalScore: number;
-    maxScore: number;
-    numMatches: number;
-  }> = {};
-
-  matches.forEach((match) => {
-    const subtopic = match.metadata?.filename;
-    if (!subtopic) return;
-
-    if (!subtopicStats[subtopic]) {
-      subtopicStats[subtopic] = {
-        totalScore: 0,
-        maxScore: 0,
-        numMatches: 0,
-      };
-    }
-    subtopicStats[subtopic].totalScore += match.score || 0;
-    subtopicStats[subtopic].maxScore = Math.max(subtopicStats[subtopic].maxScore, match.score || 0);
-    subtopicStats[subtopic].numMatches += 1;
-  });
-  
-  //mostrar subtopicStats
-  console.log("Subtopic stats:", subtopicStats);
-
-  const ranked = Object.entries(subtopicStats)
-    .map(([subtopic, stats]) => {
-      const finalScore = alpha * stats.totalScore + betta * stats.maxScore + gamma * stats.numMatches;
-      return { subtopic, finalScore };
-    })
-    .sort((a, b) => b.finalScore - a.finalScore)
-    .map(({ subtopic }) => subtopic);
-
-  
-
-  return ranked;
-}
 
 // Paso 1: Detectar tema con OpenAI
 async function detectarTema(input: string) {
@@ -174,7 +128,7 @@ async function embedQuery(query: string): Promise<number[]> {
 }
 
 // Paso 3: Buscar en Pinecone por tema, en los metadatos de los chunks hay un campo "tema"
-async function search2(query: string, topic_selected: string, topK = 5) {
+async function search(query: string, topic_selected: string, topK = 5) {
   const pinecone = new Pinecone();
   const index = await pinecone.Index(PINECONE_INDEX_NAME);
   const embedding = await embedQuery(query);
@@ -206,57 +160,6 @@ async function search2(query: string, topic_selected: string, topK = 5) {
   return results.matches;
 }
 
-async function search(query: string, topic_selected: string, topK = 5) {
-  const pinecone = new Pinecone();
-  const index = await pinecone.Index(PINECONE_INDEX_NAME);
-  const embedding = await embedQuery(query);
-
-  const hasSubtopic = topicWithSubtopics.includes(topic_selected) || temaConMuchosSubtemas.includes(topic_selected);
-
-  let filter;
- 
-  if (hasSubtopic) {
-    // Obtener todos los matches sin filtro para rankear
-    const rawResults = await index.query({
-      vector: embedding,
-      topK: 50, // suficiente para rankear subtemas
-      includeMetadata: true,
-      filter: { tema: { $eq: topic_selected } },
-    });
-
-    const subtemasRanked = rankSubtemasPorRelevancia(rawResults.matches);
-  //escoger los NUM_SUBTOPICS temas más relevantes
-    subtemasSeleccionados = subtemasRanked.slice(0, NUM_SUBTOPICS);
-    console.log(`Subtemas seleccionados: ${subtemasSeleccionados.join(", ")}`);
-
-    // Seleccionar solo el subtema más relevante
-    const subtemaTop = subtemasRanked[0];
-    console.log(`Subtema más relevante sacado de funcion search: ${subtemaTop}`);
-
-    if (!subtemaTop) {
-      // fallback: sin subtema válido
-      console.log("No se encontró un subtema válido, filtrando por tema " + topic_selected);
-      filter = { tema: { $eq: topic_selected } };
-    } else {
-      console.log(`Filtrando por subtema: ${subtemaTop}`);
-      filter = {
-        filename: { $eq: subtemaTop },
-      };
-    }
-  } else {
-    // No hay subtemas asociados: filtrar por tema
-    filter = { tema: { $eq: topic_selected } };
-  }
-  const finalResults = await index.query({
-  vector: embedding,
-      topK,
-      includeMetadata: true,
-      filter,
-    });
-
-  return finalResults.matches;
-}
-
 // Generar respuesta desde chunks
 async function generateAnswer(query: string, matches: any[]) {
   //generar url usando los metadatos de los chunks y que comienze por https://ull-pl.vercel.app/topics/ y que le siga el tema y luego el filename sin .md o .mdx
@@ -265,24 +168,13 @@ async function generateAnswer(query: string, matches: any[]) {
   const filename = matches[0]?.metadata?.filename || "general";
   const url = `${baseUrl}${topic}/${filename.replace(/\.mdx?$/, "")}`;
 
-  const enlaces = subtemasSeleccionados.map(subtema => {
-    return `${baseUrl}${topic}/${subtema.replace(/\.mdx?$/, "")}`;
-
-  }).join("\n");
-
-
-  console.log(`Enlaces generados: ${enlaces}`);
-  console.log(`topic: ${topic}`);
-  console.log(`filename: ${filename}`);
-
-
   const context = matches.map((m: any) => m.metadata?.text || "").join("\n\n");
   console.log(`Contexto encontrado: ${context.slice(0, 200)}...`);  
   if (!context) {
         return "No tengo suficiente información para responder a tu pregunta.";
     }
 
-  const prompt = ANSWER_TEMPLATE.replace("{context}", context).replace("{query}", query).replace("{url}", enlaces);
+  const prompt = ANSWER_TEMPLATE.replace("{context}", context).replace("{query}", query).replace("{url}", url);
 
   const response = await generateChatCompletion([
     { role: "user", content: prompt }
