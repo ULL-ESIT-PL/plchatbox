@@ -2,7 +2,9 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTopic } from "./topic-context";
+import { topics } from "@/lib/topics_with_subtopics_index";
 
+/*
 const topics = [
   { value: "type-checking", label: "Type checking" },
   { value: "code-generation", label: "Code generation" },
@@ -16,6 +18,7 @@ const topics = [
   { value: "interpretation", label: "Interpretation" },
   { value: "introduction-to-pl", label: "Introduction to PL" }
 ]; 
+*/
 
 export function TopicSelect() {
   const { topic, setTopic} = useTopic();

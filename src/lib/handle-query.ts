@@ -4,7 +4,8 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { TOPIC_TEMPLATE, ANSWER_TEMPLATE} from "./prompt-templates";
 import { generateEmbedding, generateChatCompletion } from "./openai";
 import { TemplateContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { topicWithSubtopics, subtopicPrompts, temaConMuchosSubtemas } from "./config";
+import { subtopicPrompts, temaConMuchosSubtemas } from "./config";
+import { topicsWithSubtopics } from "./topics_with_subtopics_index";
 import OpenAI from "openai";
 import { StreamingTextResponse, OpenAIStream, LangChainStream, experimental_StreamData } from "ai";
 import { ChatCompletionChunk } from "openai/resources/index.mjs";
@@ -179,7 +180,7 @@ async function search2(query: string, topic_selected: string, topK = 5) {
   const index = await pinecone.Index(PINECONE_INDEX_NAME);
   const embedding = await embedQuery(query);
 
-  const hasSubtopic = topicWithSubtopics.includes(topic_selected);
+  const hasSubtopic = topicsWithSubtopics.includes(topic_selected);
   const isTemaConMuchosSubtemas = topic_selected === "introduction-to-javascript";
 
   const filter = isTemaConMuchosSubtemas
@@ -211,7 +212,7 @@ async function search(query: string, topic_selected: string, topK = 5) {
   const index = await pinecone.Index(PINECONE_INDEX_NAME);
   const embedding = await embedQuery(query);
 
-  const hasSubtopic = topicWithSubtopics.includes(topic_selected) || temaConMuchosSubtemas.includes(topic_selected);
+  const hasSubtopic = topicsWithSubtopics.includes(topic_selected);
 
   let filter;
  
